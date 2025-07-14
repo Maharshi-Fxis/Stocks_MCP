@@ -202,41 +202,6 @@ async def handle_call_tool(
             series_text = f"Time series data for {symbol}:\n\n{formatted_series}"
 
             return [types.TextContent(type="text", text=series_text)]
-        
-    elif name == "get-historical-options":
-        symbol = arguments.get("symbol")
-        date = arguments.get("data")
-        limit = arguments.get("limit", 10)
-        sort_by = arguments.get("sort_by", "strike")
-        soret_order = arguments.get("sort_order", "asc")
-
-        if not symbol:
-            return [type.TextContent(type="text", text="Missing symbol parameter")]
-        
-        symbol = symbol.upper()
-
-        async with httpx.AsyncClient() as client:
-            params = {}
-            if date:
-                params["date"] = date
-
-            options_data = await make_alpha_request(
-                client,
-                "HISTORICAL_OPTIONS",
-                symbol,
-                params
-            )
-
-            if isinstance(options_data, str):
-                return [types.TextContent(type="text", text=f"Error:{options_data}")]
-            
-            formatted_options = format_historical_options(options_data, limit, sort_by, soret_order)
-            options_text = f"Historical options data for {symbol}"
-            if date:
-                options_text += f" on {date}"
-            options_text += f":\n\n{formatted_options}"
-
-            return [types.TextContent(type="text", text=options_text)]
 
     
 async def main():

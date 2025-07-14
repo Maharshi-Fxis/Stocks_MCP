@@ -12,3 +12,4 @@ wheels/
 .env
 exs.py
 ext.py
+README.md
