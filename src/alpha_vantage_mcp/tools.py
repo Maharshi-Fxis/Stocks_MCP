@@ -121,3 +121,64 @@ def format_time_series(time_series_data: Dict[str, Any]) -> str:
         return "\n".join(formatted_data)
     except Exception as e:
         return f"Error formatting time series data: {str(e)}"
+
+
+def format_historical_options(options_data: Dict[str,Any], limit: int = 10, sort_by: str = "strike", sort_order: str = "asc") -> str:
+    try:
+        if "Error Message" in options_data:
+            return f"Error: {options_data['Error Message']}"
+        
+        options_chain = options_data.get("data",[])
+
+        if not options_chain:
+            return "No options data available in the response"
+        
+        formatted = [
+            f"Historical Options Data:\n",
+            f"Status: {options_data.get('message', 'N/A')}\n"
+            f"Sorted by: {sort_by} ({sort_order})\n\n"
+        ]
+
+        def get_sort_key(Contract):
+            value = Contract.get(sort_by, 0)
+            try:
+                if isinstance(value, str):
+                    value = value.replace('$', '').replace('%', '')
+                return float(value)
+            except (ValueError, TypeError):
+                return value
+            
+        sorted_chain = sorted(
+            options_chain,
+            key=get_sort_key,
+            reverse=(sort_order == "desc")
+        )
+
+        display_contracts = sorted_chain if limit == -1 else sorted_chain[:limit]
+
+        for contract in display_contracts:
+            formatted.append(f"Contract Details:\n")
+            formatted.append(f"Contract ID: {contract.get('contractID', 'N/A')}\n")
+            formatted.append(f"Expiration: {contract.get('expiration', 'N/A')}\n")
+            formatted.append(f"Strike: {contract.get('strike', 'N/A')}\n")
+            formatted.append(f"Type: {contract.get('type', 'N/A')}\n")
+            formatted.append(f"Last: {contract.get('last', 'N/A')}\n")
+            formatted.append(f"Mark: {contract.get('mark', 'N/A')}\n")
+            formatted.append(f"Bid: ${contract.get('bid', 'N/A')} (Size: {contract.get('bid_size', 'N/A')})\n")
+            formatted.append(f"Ask: ${contract.get('Ask', 'N/A')} (Size: {contract.get('ask_size', 'N/A')})\n")
+            formatted.append(f"Volume: ${contract.get('volume', 'N/A')}\n")
+            formatted.append(f"Open Interest: ${contract.get('open_interest', 'N/A')}\n")
+            formatted.append(f"IV: ${contract.get('implied_volatility', 'N/A')}\n")
+            formatted.append(f"Delta: ${contract.get('delta', 'N/A')}\n")
+            formatted.append(f"Gamma: ${contract.get('gamma', 'N/A')}\n")
+            formatted.append(f"Theta: ${contract.get('theta', 'N/A')}\n")
+            formatted.append(f"Vega: ${contract.get('vega', 'N/A')}\n")
+            formatted.append(f"Rho: {contract.get('rho', 'N/A')}\n")
+            formatted.append("---\n")
+
+        if limit!=-1 and len(sorted_chain)>limit:
+            formatted.append(f"\n... and {len(sorted_chain) - limit} more contracts")
+
+        return "".join(formatted)
+    except Exception as e:
+        return f"Error formatting options data: {str(e)}"

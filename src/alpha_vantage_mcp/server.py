@@ -12,6 +12,7 @@ from .tools import (
     format_quote,
     format_company_info,
     format_time_series,
+    format_historical_options,
     ALPHA_VANTAGE_BASE,
     API_KEY
 )
@@ -71,6 +72,57 @@ async def handle_list_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["symbol"],
+            },
+        ),
+        types.Tool(
+            name="get-historical-options",
+            description="get historical options chain data for a stock with sorting capabilities",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "description": "Stock symbol (e.g., AAPL, MSFT)",
+                    },
+                    "date":{
+                        "type": "string",
+                        "description": "Optional: Trading date in YYYY-MM-DD format (defaults to previous trading day, must be after 2008-01-01)",
+                        "pattern": "^20[0-9]{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Optional: Number of contracts to return (default: 10, use -1 for all contracts)",
+                        "default": 10,
+                        "minimum": -1
+                    },
+                    "sort_by": {
+                        "type": "string",
+                        "description": "Optional: Field to sort by",
+                        "enum": [
+                            "strike",
+                            "expiration",
+                            "volume",
+                            "open_interest",
+                            "implied_volatility",
+                            "delta",
+                            "gamma",
+                            "theta",
+                            "vega"
+                            "rho",
+                            "last",
+                            "bid",
+                            "ask"
+                        ],
+                        "default": "strike"
+                    },
+                    "sort_order": {
+                        "type": "string",
+                        "description": "Optional: Sort order",
+                        "enum": ["asc", "desc"],
+                        "default": "asc"
+                    }
+                },
+                "required": ["symbol"]
             },
         )
     ]
