@@ -176,9 +176,76 @@ def format_historical_options(options_data: Dict[str,Any], limit: int = 10, sort
             formatted.append(f"Rho: {contract.get('rho', 'N/A')}\n")
             formatted.append("---\n")
 
-        if limit!=-1 and len(sorted_chain)>limit:
+        if limit != -1 and len(sorted_chain) > limit:
             formatted.append(f"\n... and {len(sorted_chain) - limit} more contracts")
 
         return "".join(formatted)
     except Exception as e:
         return f"Error formatting options data: {str(e)}"
+    
+def format_crypto_rate(crypto_data: Dict[str, Any]) -> str:
+    try:
+        realtime_data = crypto_data.get("Realtime Currency Exchange Rate", {})
+        if not realtime_data:
+            return "No exchange rate data available in the response"
+        return (
+            f"From: {realtime_data.get('2. From_Currency Name', 'N/A')} ({realtime_data.get('1. From_Currency Code', 'N/A')})\n"
+            f"To: {realtime_data.get('4. To_Currency Name', 'N/A')} ({realtime_data.get('3. To_Currency Code', 'N/A')})\n"
+            f"Last updated: {realtime_data.get('6. Last Refreshed', 'N/A')} ({realtime_data.get('7. Time Zone', 'N/A')})\n"
+            f"Exchange Rate: {realtime_data.get('5. Exchange Rate', 'N/A')}\n"
+            f"Bid Price: {realtime_data.get('8. Bid Price', 'N/A')}\n"
+            f"Ask Price: {realtime_data.get('5. Ask Price', 'N/A')}\n"
+        )
+    except Exception as e:
+        return f"Error formatting cryptocurrency data: {str(e)}"
+    
+def format_crypto_time_series(time_series_data: Dict[str, Any], series_type: str) -> str:
+    try:
+        time_series_key = ""
+        if series_type == "daily":
+            time_series_key = "Time Series (Digital Currency Daily)"
+        elif series_type == "weekly":
+            time_series_key = "Time Series (Digital Currency Weekly)"
+        elif series_type == "monthly":
+            time_series_key = "Time Series (Digital Currency Monthly)"
+        else:
+            return f"Unknown series type: {series_type}"
+        
+        time_series = time_series_data.get(time_series_key, {})
+        if not time_series:
+            all_keys = ", ".join(time_series_data.keys())
+            return f"No cryptocurrency time series data found with key: '{time_series_key}'. \nAvailable keys: {all_keys}"
+        
+        metadata = time_series_data.get("Meta Data", {})
+        crypto_symbol = metadata.get("2, Digital Currency Code", "Unknown")
+        crypto_name = metadata.get("3. Digital Currency Name", "Unknown")
+        market = metadata.get("4. Market Code", "Unknown")
+        market_name = metadata.get("5. Market Name", "Unknown")
+        last_refreshed = metadata.get("6. Last Refreshed", "Unknown")
+        time_zone = metadata.get("7. Time Zone", "Unknown")
+
+        formatted_data = [
+            f"{series_type.capitalize()} Time Series for {crypto_name} ({crypto_symbol})",
+            f"Market: {market_name} ({market})",
+            f"Last Refreshed: {last_refreshed} {time_zone}",
+            ""
+        ]
+
+        for date, values in list(time_series.items())[:5]:
+            open_price = values.get("1. open", "N/A")
+            high_price = values.get("2. high", "N/A")
+            low_price = values.get("3. low", "N/A")
+            close_price = values.get("4. close", "N/A")
+            volume = values.get("5. volume", "N/A")
+
+            formatted_data.append(f"Date: {date}")
+            formatted_data.append(f"Open: {open_price} {market}")
+            formatted_data.append(f"High: {high_price} {market}")
+            formatted_data.append(f"Low: {low_price} {market}")
+            formatted_data.append(f"Close: {close_price} {market}")
+            formatted_data.append(f"Volume: {volume}")
+            formatted_data.append("---")
+
+        return "\n".join(formatted_data)
+    except Exception as e:
+        return f"Error formatting cryptocurrency time series data: {str(e)}"
