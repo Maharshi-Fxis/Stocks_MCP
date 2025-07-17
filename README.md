@@ -1,4 +1,4 @@
-# Alpha Vantage MCP Server
+# Stocks MCP Server
 A Model Context Protocol (MCP) server that provides real-time access to financial market data through the free [Alpha Vantage API](https://www.alphavantage.co/documentation/). This server implements a standardized interface for retrieving stock quotes and company information.
 
 

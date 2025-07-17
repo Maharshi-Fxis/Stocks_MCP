@@ -17,5 +17,5 @@ build-backend = "hatchling.build"
 alpha-vantage-mcp = "alpha_vantage_mcp:main"
 
 [[project.authors]]
-name = "berlinbra"
-email = "BMBpsn@gmail.com"
+name = "Maharshi"
+email = "patelmaharshi.2708@gmail.com"
